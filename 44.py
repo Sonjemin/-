@@ -2,6 +2,7 @@ import streamlit as st
 from openai import OpenAI
 import fitz  # PyMuPDF
 from pptx import Presentation
+import re
 
 st.set_page_config(page_title="AI 자기소개서 생성기", page_icon="🧑‍💼")
 st.title("🧑‍💼 AI 자기소개서 에세이 생성기")
@@ -74,7 +75,7 @@ if uploaded_file:
     else:
         st.error("❌ 지원하지 않는 파일 형식입니다.")
 
-# 🧾 직접 입력 참고자료
+# 🧾 사용자 입력 참고 텍스트
 st.header("🧾 직접 입력 참고자료 (선택)")
 user_extra_text = st.text_area("자기소개서에 참고되었으면 하는 내용을 자유롭게 입력하세요", height=150)
 
@@ -83,8 +84,21 @@ st.header("📝 자기소개서 작성 항목")
 reason = st.text_area("1. 지원 동기", height=100)
 background = st.text_area("2. 성장 과정", height=100)
 experience = st.text_area("3. 직무 관련 경험", height=100)
-career plan = st.text_area("4. 입사 후 목표나 포부", height=100)
-warnig = st.text_area("5. 위기 극복 경험", height=100)
+
+def check_length(text, min_length, max_length):
+    """
+    주어진 문자열의 길이가 최소 및 최대 범위 내에 있는지 확인하는 함수.
+
+    Parameters:
+        text (str): 검사할 문자열
+        min_length (int): 최소 글자 수
+        max_length (int): 최대 글자 수
+
+    Returns:
+        bool: 길이가 범위 내에 있으면 True, 그렇지 않으면 False
+    """
+    length = len(text)
+ return min_length <= length <= max_length
 
 # 자기소개서 생성 함수
 def generate_cover_letter(reason, background, experience, company, pdf_text="", user_text=""):
@@ -118,14 +132,17 @@ def generate_cover_letter(reason, background, experience, company, pdf_text="", 
     )
     return response.choices[0].message.content.strip()
 
-# 면접 질문 + 모범 답변 생성 함수
+# 면접 질문 + 모범 답변 생성
 def generate_questions_and_answers(cover_letter_text, company):
     prompt = f"""
-다음은 {company}에 지원한 자기소개서입니다. 이 내용을 기반으로 실제 면접에서 나올 수 있는 심도 있는 질문 5개와 각 질문에 대한 모범적인 답변 예시를 작성해 주세요.
+다음은 {company}에 지원한 자기소개서입니다. 이 내용을 기반으로 실제 면접에서 나올 수 있는 질문 5개와 각 질문에 대한 모범적인 답변을 작성해주세요.
 
 형식:
 Q1. 질문 내용
 A1. 모범 답변
+
+Q2. ...
+A2. ...
 
 [자기소개서]
 {cover_letter_text}
@@ -136,6 +153,15 @@ A1. 모범 답변
         temperature=0.7
     )
     return response.choices[0].message.content.strip()
+
+# 질문/답변 파싱 함수
+def parse_questions_and_answers(text):
+    qa_pairs = []
+    pattern = re.compile(r"Q\d+\.\s*(.*?)\nA\d+\.\s*(.*?)(?=\nQ\d+\.|\Z)", re.DOTALL)
+    matches = pattern.findall(text)
+    for q, a in matches:
+        qa_pairs.append((q.strip(), a.strip()))
+    return qa_pairs
 
 # 🚀 실행
 if st.button("🚀 자기소개서 + 면접 질문 생성"):
@@ -149,6 +175,11 @@ if st.button("🚀 자기소개서 + 면접 질문 생성"):
         st.download_button("📥 자기소개서 다운로드", cover_letter, file_name="cover_letter.txt")
 
         with st.spinner("면접 질문 및 모범 답변을 생성 중입니다..."):
-            qna = generate_questions_and_answers(cover_letter, company)
-        st.subheader("💬 예상 면접 질문 + 모범 답변")
-        st.write(qna)
+            raw_qna = generate_questions_and_answers(cover_letter, company)
+            qa_pairs = parse_questions_and_answers(raw_qna)
+
+        st.subheader("💬 예상 면접 질문 & 모범 답변")
+        for i, (q, a) in enumerate(qa_pairs):
+            st.markdown(f"**Q{i+1}. {q}**")
+            st.markdown(f":green[A{i+1}. {a}]")
+            st.markdown("---")
