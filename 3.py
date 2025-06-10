@@ -83,7 +83,7 @@ st.header("📝 자기소개서 작성 항목")
 reason = st.text_area("1. 지원 동기", height=100)
 background = st.text_area("2. 성장 과정", height=100)
 experience = st.text_area("3. 직무 관련 경험", height=100)
-career plan = st.text_area("4. 입사 후 목표나 포부", height=100)
+career_plan = st.text_area("4. 입사 후 목표나 포부", height=100)
 warnig = st.text_area("5. 위기 극복 경험", height=100)
 
 # 자기소개서 생성 함수
