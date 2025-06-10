@@ -4,7 +4,7 @@ import openai
 openai.api_key = "YOUR_OPENAI_API_KEY"
 
 st.title("✍️ AI 자기소개서 생성기")
-st.set_page_config(page_title="자기소개서 예상 질문 생성기", page_icon="🤖")
+
 name = st.text_input("이름")
 major = st.text_input("전공")
 job_role = st.text_input("지원 직무")
