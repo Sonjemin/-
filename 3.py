@@ -83,9 +83,22 @@ st.header("📝 자기소개서 작성 항목")
 reason = st.text_area("1. 지원 동기", height=100)
 background = st.text_area("2. 성장 과정", height=100)
 experience = st.text_area("3. 직무 관련 경험", height=100)
-career_plan = st.text_area("4. 입사 후 목표나 포부", height=100)
-warnig = st.text_area("5. 위기 극복 경험", height=100)
 
+def check_length(text, min_length, max_length):
+    """
+    주어진 문자열의 길이가 최소 및 최대 범위 내에 있는지 확인하는 함수.
+
+    Parameters:
+        text (str): 검사할 문자열
+        min_length (int): 최소 글자 수
+        max_length (int): 최대 글자 수
+
+    Returns:
+        bool: 길이가 범위 내에 있으면 True, 그렇지 않으면 False
+    """
+    length = len(text)
+    return min_length <= length <= max_length
+    
 # 자기소개서 생성 함수
 def generate_cover_letter(reason, background, experience, company, pdf_text="", user_text=""):
     traits = ", ".join(company_values[company])
@@ -152,3 +165,4 @@ if st.button("🚀 자기소개서 + 면접 질문 생성"):
             qna = generate_questions_and_answers(cover_letter, company)
         st.subheader("💬 예상 면접 질문 + 모범 답변")
         st.write(qna)
+
