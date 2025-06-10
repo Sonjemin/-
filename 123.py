@@ -4,7 +4,7 @@ import openai
 openai.api_key = "YOUR_OPENAI_API_KEY"
 
 st.title("✍️ AI 자기소개서 생성기")
-
+st.set_page_config(page_title="자기소개서 예상 질문 생성기", page_icon="🤖")
 name = st.text_input("이름")
 major = st.text_input("전공")
 job_role = st.text_input("지원 직무")
@@ -37,7 +37,7 @@ if st.button("자기소개서 생성"):
         st.success("완성된 자기소개서:")
         st.text_area("자기소개서 결과", result, height=300)
 
-st.set_page_config(page_title="자기소개서 예상 질문 생성기", page_icon="🤖")
+
 st.title("🎯 자기소개서 기반 예상 면접 질문 생성기")
 
 st.write("자기소개서 내용을 입력하면, 예상 질문을 도출해 드립니다.")
